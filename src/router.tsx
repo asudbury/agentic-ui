@@ -12,7 +12,7 @@
 import {
   createRouter,
   createRootRoute,
-  createRoute
+  createRoute,
 } from '@tanstack/react-router';
 
 import { RootComponent } from './components/RootComponent';
@@ -21,7 +21,7 @@ import { HomePage } from './pages/HomePage';
  * Root route definition for TanStack Router
  */
 const rootRoute = createRootRoute({
-  component: RootComponent
+  component: RootComponent,
 });
 
 /**
@@ -30,7 +30,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: HomePage
+  component: HomePage,
 });
 
 const routeTree = rootRoute.addChildren([indexRoute]);
@@ -43,7 +43,7 @@ export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   basepath:
-    import.meta.env.MODE === 'production' ? '/modern-react-template/app' : '/'
+    import.meta.env.MODE === 'production' ? '/modern-react-template/app' : '/',
 });
 
 /**
