@@ -43,7 +43,7 @@ export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   basepath:
-    import.meta.env.MODE === 'production' ? '/modern-react-template/app' : '/',
+    import.meta.env.MODE === 'production' ? '/agentic-ui/app' : '/',
 });
 
 /**
