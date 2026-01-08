@@ -178,25 +178,10 @@ export function HomePage() {
           <AgentStatus status={status} message={statusMessage} />
         </div>
 
-        {/* Main Grid Layout */}
-        <div
-          className="grid grid-cols-1 gap-6"
-          style={{ gridTemplateColumns: '1fr' }}
-        >
-          {/* Left Column - Input and Controls */}
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column - Agent Information */}
           <div className="flex flex-col gap-6">
-            {!isActive && (
-              <div>
-                <h2 className="text-2xl font-bold text-text-primary mb-4">
-                  What would you like to achieve?
-                </h2>
-                <GoalInput
-                  onSubmit={handleGoalSubmit}
-                  isProcessing={isActive}
-                />
-              </div>
-            )}
-
             {isActive && (
               <>
                 <ControlPanel
@@ -221,47 +206,58 @@ export function HomePage() {
 
             <ActivityLog activities={activities} />
           </div>
-        </div>
 
-        {/* Info Section */}
-        {!isActive && activities.length === 0 && (
-          <div
-            className="mt-8 p-6 rounded-lg"
-            style={{ backgroundColor: 'var(--color-surface)' }}
-          >
-            <h3 className="text-lg font-bold text-text-primary mb-3">
-              Welcome to Agentic UI
-            </h3>
-            <p className="text-sm text-text-secondary mb-4">
-              This interface demonstrates the principles of agentic AI design:
-            </p>
-            <ul
-              className="text-sm text-text-secondary"
-              style={{ listStyle: 'disc', paddingLeft: '1.5rem' }}
-            >
-              <li className="mb-2">
-                <strong>Goal-oriented:</strong> Describe what you want to
-                achieve, not individual tasks
-              </li>
-              <li className="mb-2">
-                <strong>Transparent reasoning:</strong> See how the agent thinks
-                and makes decisions
-              </li>
-              <li className="mb-2">
-                <strong>User control:</strong> Pause, resume, or stop the agent
-                at any time
-              </li>
-              <li className="mb-2">
-                <strong>Activity tracking:</strong> View a complete history of
-                agent actions
-              </li>
-              <li>
-                <strong>Adaptive workflow:</strong> The agent breaks down
-                complex goals into manageable steps
-              </li>
-            </ul>
+          {/* Right Column - User Input */}
+          <div className="flex flex-col gap-6">
+            <div>
+              <h2 className="text-2xl font-bold text-text-primary mb-4">
+                What would you like to achieve?
+              </h2>
+              <GoalInput onSubmit={handleGoalSubmit} isProcessing={isActive} />
+            </div>
+
+            {/* Info Section */}
+            {!isActive && activities.length === 0 && (
+              <div
+                className="p-6 rounded-lg"
+                style={{ backgroundColor: 'var(--color-surface)' }}
+              >
+                <h3 className="text-lg font-bold text-text-primary mb-3">
+                  Welcome to Agentic UI
+                </h3>
+                <p className="text-sm text-text-secondary mb-4">
+                  This interface demonstrates the principles of agentic AI
+                  design:
+                </p>
+                <ul
+                  className="text-sm text-text-secondary"
+                  style={{ listStyle: 'disc', paddingLeft: '1.5rem' }}
+                >
+                  <li className="mb-2">
+                    <strong>Goal-oriented:</strong> Describe what you want to
+                    achieve, not individual tasks
+                  </li>
+                  <li className="mb-2">
+                    <strong>Transparent reasoning:</strong> See how the agent
+                    thinks and makes decisions
+                  </li>
+                  <li className="mb-2">
+                    <strong>User control:</strong> Pause, resume, or stop the
+                    agent at any time
+                  </li>
+                  <li className="mb-2">
+                    <strong>Activity tracking:</strong> View a complete history
+                    of agent actions
+                  </li>
+                  <li>
+                    <strong>Adaptive workflow:</strong> The agent breaks down
+                    complex goals into manageable steps
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </main>
 
       <Footer />

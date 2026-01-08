@@ -63,10 +63,11 @@ export function Header() {
 
         <button
           onClick={handleToggleTheme}
-          className="flex items-center justify-center p-2 rounded-lg transition"
+          className="flex items-center justify-center p-2 rounded-lg transition cursor-pointer"
           style={{
             backgroundColor: 'var(--color-surface-secondary)',
             border: '1px solid var(--color-border)',
+            cursor: 'pointer',
           }}
           aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
