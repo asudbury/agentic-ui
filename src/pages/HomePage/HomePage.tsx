@@ -10,6 +10,7 @@
  * - Activity log of actions
  * - Progress tracking
  * - User controls for agent management
+ * - Dynamic UI generation (Apple Glass feel)
  *
  * @returns JSX.Element representing the Home page with Agentic UI
  */
@@ -30,6 +31,9 @@ import {
   ProgressTracker,
   type ProgressStep,
 } from '../../components/ProgressTracker';
+import { AgentCanvas } from '../../components/AgentCanvas';
+import type { AgentUIResponse } from '../../types/componentRegistry';
+import { generateMockAgentResponse } from '../../utils/mockAgentResponse';
 
 export function HomePage() {
   const [status, setStatus] = useState<AgentStatusType>('idle');
@@ -41,6 +45,9 @@ export function HomePage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [steps, setSteps] = useState<ProgressStep[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [agentResponse, setAgentResponse] = useState<AgentUIResponse | null>(
+    null
+  );
 
   const addActivity = useCallback((type: Activity['type'], message: string) => {
     setActivities((prev) => [
@@ -79,16 +86,16 @@ export function HomePage() {
       setStatusMessage('Executing workflow...');
       addActivity('action', 'Started workflow execution');
 
-      // Create progress steps
+      // Create progress steps for dynamic UI generation
       const workflowSteps: ProgressStep[] = [
         {
           id: uuidv4(),
-          label: 'Research and data gathering',
+          label: 'Analyzing goal and context',
           completed: false,
         },
-        { id: uuidv4(), label: 'Analysis and processing', completed: false },
-        { id: uuidv4(), label: 'Solution formulation', completed: false },
-        { id: uuidv4(), label: 'Review and refinement', completed: false },
+        { id: uuidv4(), label: 'Selecting UI components', completed: false },
+        { id: uuidv4(), label: 'Generating interface', completed: false },
+        { id: uuidv4(), label: 'Rendering final UI', completed: false },
       ];
       setSteps(workflowSteps);
 
@@ -103,7 +110,7 @@ export function HomePage() {
         setCurrentThought(`Working on: ${workflowSteps[i].label}`);
         addActivity('action', `Started: ${workflowSteps[i].label}`);
 
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
         setSteps((prev) =>
           prev.map((step, idx) =>
@@ -119,6 +126,18 @@ export function HomePage() {
         setReasoning((prev) => [...prev, reasoningStep]);
         addActivity('action', `Completed: ${workflowSteps[i].label}`);
       }
+
+      // Generate dynamic UI response
+      setCurrentThought('Generating dynamic UI components...');
+      addActivity('action', 'Generating UI components based on goal');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const response = generateMockAgentResponse(goal);
+      setAgentResponse(response);
+      addActivity(
+        'action',
+        `Generated ${response.ui_components.length} UI components`
+      );
 
       setCurrentThought('');
       setStatus('idle');
@@ -156,6 +175,7 @@ export function HomePage() {
     setStatus('idle');
     setStatusMessage('Agent stopped');
     setCurrentThought('');
+    setAgentResponse(null);
     addActivity('info', 'Agent stopped by user');
   }, [addActivity]);
 
@@ -199,7 +219,7 @@ export function HomePage() {
             <ActivityLog activities={activities} />
           </div>
 
-          {/* Right Column - User Input */}
+          {/* Right Column - User Input and Dynamic UI */}
           <div className="flex flex-col gap-6">
             <div>
               <h2 className="text-2xl font-bold text-text-primary mb-4">
@@ -208,8 +228,11 @@ export function HomePage() {
               <GoalInput onSubmit={handleGoalSubmit} isProcessing={isActive} />
             </div>
 
+            {/* Dynamic UI Canvas */}
+            {agentResponse && <AgentCanvas agentResponse={agentResponse} />}
+
             {/* Info Section */}
-            {!isActive && activities.length === 0 && (
+            {!isActive && activities.length === 0 && !agentResponse && (
               <div
                 className="p-6 rounded-lg"
                 style={{ backgroundColor: 'var(--color-surface)' }}
@@ -219,7 +242,7 @@ export function HomePage() {
                 </h3>
                 <p className="text-sm text-text-secondary mb-4">
                   This interface demonstrates the principles of agentic AI
-                  design:
+                  design with dynamic UI generation:
                 </p>
                 <ul
                   className="text-sm text-text-secondary"
@@ -228,6 +251,10 @@ export function HomePage() {
                   <li className="mb-2">
                     <strong>Goal-oriented:</strong> Describe what you want to
                     achieve, not individual tasks
+                  </li>
+                  <li className="mb-2">
+                    <strong>Dynamic UI:</strong> The interface morphs to show
+                    results as interactive components, not just text
                   </li>
                   <li className="mb-2">
                     <strong>Transparent reasoning:</strong> See how the agent
