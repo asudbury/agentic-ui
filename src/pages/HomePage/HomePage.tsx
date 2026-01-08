@@ -178,8 +178,8 @@ export function HomePage() {
           <AgentStatus status={status} message={statusMessage} />
         </div>
 
-        {/* Two Column Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Two Column Layout - Fixed Side by Side */}
+        <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
           {/* Left Column - Agent Information */}
           <div className="flex flex-col gap-6">
             {isActive && (
