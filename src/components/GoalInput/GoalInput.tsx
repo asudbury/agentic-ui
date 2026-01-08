@@ -37,14 +37,44 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
     [goal, isProcessing, onSubmit]
   );
 
-  const handleExampleClick = useCallback((example: string) => {
-    setGoal(example);
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setGoal(e.target.value);
+    },
+    []
+  );
+
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLTextAreaElement>) => {
+      e.target.style.borderColor = 'var(--color-primary)';
+    },
+    []
+  );
+
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLTextAreaElement>) => {
+    e.target.style.borderColor = 'var(--color-border)';
   }, []);
 
+  const handleExampleClick = useCallback(
+    (example: string) => () => {
+      setGoal(example);
+    },
+    []
+  );
+
   const examples = [
-    'Plan a 3-day business trip to San Francisco including flights, hotels, and meeting schedules',
-    'Create a comprehensive marketing strategy for our new product launch',
-    'Analyze our Q4 sales data and provide insights with visualization recommendations',
+    {
+      id: 'example-1',
+      text: 'Plan a 3-day business trip to San Francisco including flights, hotels, and meeting schedules',
+    },
+    {
+      id: 'example-2',
+      text: 'Create a comprehensive marketing strategy for our new product launch',
+    },
+    {
+      id: 'example-3',
+      text: 'Analyze our Q4 sales data and provide insights with visualization recommendations',
+    },
   ];
 
   return (
@@ -53,7 +83,7 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
         <textarea
           id="goal-input"
           value={goal}
-          onChange={(e) => setGoal(e.target.value)}
+          onChange={handleChange}
           placeholder="Describe your goal or objective in detail..."
           className="p-4 rounded-lg text-base resize-none"
           style={{
@@ -63,12 +93,8 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
             color: 'var(--color-text)',
             outline: 'none',
           }}
-          onFocus={(e) => {
-            e.target.style.borderColor = 'var(--color-primary)';
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = 'var(--color-border)';
-          }}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           disabled={isProcessing}
           aria-label="Goal input"
         />
@@ -97,10 +123,10 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
       <div className="flex flex-col gap-2">
         <p className="text-xs text-text-muted font-medium">Example goals:</p>
         <div className="flex flex-col gap-2">
-          {examples.map((example, index) => (
+          {examples.map((example) => (
             <button
-              key={index}
-              onClick={() => handleExampleClick(example)}
+              key={example.id}
+              onClick={handleExampleClick(example.text)}
               className="text-left p-3 rounded-lg text-sm transition cursor-pointer"
               style={{
                 backgroundColor: 'var(--color-surface)',
@@ -110,7 +136,7 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
               }}
               disabled={isProcessing}
             >
-              {example}
+              {example.text}
             </button>
           ))}
         </div>

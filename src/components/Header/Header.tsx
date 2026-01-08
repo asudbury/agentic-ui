@@ -43,7 +43,13 @@ export function Header() {
               justifyContent: 'center',
             }}
           >
-            <span className="text-2xl">🤖</span>
+            <span
+              className="text-2xl"
+              role="img"
+              aria-label="AI assistant logo"
+            >
+              🤖
+            </span>
           </div>
           <div>
             <h1 className="text-xl font-bold text-text-primary m-0">

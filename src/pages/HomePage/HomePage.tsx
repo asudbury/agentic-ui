@@ -97,7 +97,8 @@ export function HomePage() {
 
       // Simulate workflow progress
       for (let i = 0; i < workflowSteps.length; i++) {
-        if (isPaused) {
+        // Wait while paused
+        while (isPaused) {
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
