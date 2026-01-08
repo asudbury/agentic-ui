@@ -1,0 +1,333 @@
+# This GitHub Actions workflow runs the continuous-integration (CI) pipeline
+# for the "modern-react-template" repository.
+#
+
+# Summary:
+
+# - Triggers: `push` to `main` and `pull_request` events targeting `main`.
+# - Concurrency: cancels in-progress runs for the same ref to avoid duplicated work.
+# - Jobs include secret scanning, linting, formatting check, unit tests, build,
+#   end-to-end tests (Playwright + axe), and a static analysis step (Knip).
+# - Artifacts: test coverage, build `dist/`, and Playwright reports are uploaded
+#   and retained for a short period to help debugging CI failures.
+#
+# Notes for newcomers:
+
+# - Each job runs on `ubuntu-latest` and uses `actions/setup-node` (Node.js 20).
+# - `HUSKY` is disabled in CI (`HUSKY: '0'`) so pre-commit hooks don't run during
+#   automated CI installs.
+# - To run these checks locally, install deps with `npm ci` then run the script
+#   names used in the jobs (for example `npm run lint`, `npm run test:unit`,
+#   `npm run build`, `npm run test:e2e`).
+# - Repository variables such as `ENABLE_GH_PAGES` and `ENABLE_JSDOC_BUILD` are
+#   logged by several jobs and may toggle additional CI behavior when configured
+#   in the repository settings.
+#
+
+# This file is heavily commented so contributors can understand when and how
+# each job runs. If you change job names or add new steps, also update these
+# comments so the next person can follow the CI flow.
+
+name: CI
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  log-context:
+    name: Log workflow context
+    runs-on: ubuntu-latest
+    # This job centralizes logging of workflow context so it's printed once
+    # at the start of the run instead of repeated in every job.
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Log workflow context
+        run: |
+          echo "[CI][context] Triggered by $GITHUB_EVENT_NAME on ref $GITHUB_REF for $GITHUB_REPOSITORY"
+      - name: Debug Info (non-sensitive)
+        # Run debug-info here once per workflow run; `show-env=false` to avoid
+        # printing environment variables during normal CI runs.
+        uses: ./.github/actions/debug-info
+        with:
+          show-env: 'false'
+
+  secret-scan:
+    # Secret scanning: detects accidentally committed secrets using Gitleaks.
+    # This job is a fast safety check and will fail if secrets are found.
+    name: Secret Scanning (Gitleaks)
+    runs-on: ubuntu-latest
+    needs: [log-context]
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret Scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+          GITLEAKS_ENABLE_COMMENTS: false
+  lint:
+    # Lint: runs ESLint to enforce code style and catch common issues.
+    # Skips Husky hooks by setting HUSKY=0 and caches npm to speed up runs.
+    name: Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      HUSKY: '0'
+    needs: [log-context]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          # Cache the local npm cache to speed up `npm ci`.
+          # Key format: <OS>-node-<hash-of-lockfile>
+          # - `runner.os` isolates caches per runner OS.
+          # - `hashFiles('**/package-lock.json')` invalidates the cache when
+          #   `package-lock.json` changes (i.e. dependencies changed).
+          # `restore-keys` provides a fallback prefix if an exact key isn't found.
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci
+      - run: npm run lint
+
+  format:
+    # Format Check: runs Prettier in "check" mode to ensure code formatting
+    # matches project conventions (does not auto-fix in CI).
+    name: Format Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      HUSKY: '0'
+    needs: [log-context]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          # Cache npm (same strategy as in lint): caches `~/.npm` keyed by
+          # OS + lockfile hash so dependency changes invalidate the cache.
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci
+      - run: npm run prettier -- --check
+
+  test:
+    # Unit Tests: runs Vitest unit tests. For PRs it runs changed-only tests;
+    # on main it runs the full test suite with coverage and uploads a report.
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: [log-context, lint]
+    permissions:
+      contents: read
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          # Cache npm for tests: reuse npm cache between jobs/runs.
+          # To force-refresh this cache, update `package-lock.json` or change
+          # the cache key here (not recommended normally).
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci
+      - name: Run changed-only unit tests for PR
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Running changed-only unit tests for PR"
+          npm run test:unit -- --changed
+      - name: Run full unit tests with coverage
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "Running full unit tests with coverage"
+          npm run test:coverage
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
+
+  build:
+    # Build: creates the production build (Vite). The built `dist/` is uploaded
+    # as an artifact so it can be inspected if a release or further checks need it.
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [log-context, test]
+    permissions:
+      contents: read
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          # Cache npm for build job. Same key pattern; helps avoid repeated
+          # package downloads during `npm ci`.
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci
+      - name: Cache Vite build cache
+        uses: actions/cache@v4
+        with:
+          # Cache Vite build artifacts to speed up subsequent builds.
+          # Key includes both the lockfile and `vite.config.ts` so config
+          # changes also invalidate the cache.
+          path: |
+            node_modules/.vite
+            .vite
+          key: ${{ runner.os }}-vite-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/vite.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-vite-
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  e2e:
+    # E2E Tests: runs Playwright end-to-end tests and accessibility checks
+    # (axe). Playwright browsers are installed explicitly and results are
+    # uploaded as artifacts for debugging test failures.
+    name: E2E Tests (Playwright + Axe)
+    runs-on: ubuntu-latest
+    needs: [log-context, build]
+    permissions:
+      contents: read
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          # Cache npm for e2e job as well.
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci
+      - name: Cache Playwright browsers and cache
+        uses: actions/cache@v4
+        with:
+          # Cache Playwright browser downloads and related caches. This
+          # avoids re-downloading large browser binaries between workflow runs.
+          # Keyed by lockfile hash so browser-cache invalidates on deps change.
+          path: |
+            ~/.cache/ms-playwright
+            ~/.cache/playwright
+            node_modules/.cache
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  knip:
+    # Knip: static analysis tool to find unused code and dependencies. This
+    # job is marked `if: always()` so it runs even when other jobs fail,
+    # and its output is uploaded to help maintainers clean up the codebase.
+    name: Knip (Unused Code Analysis)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    if: always()
+    needs: [log-context]
+    env:
+      HUSKY: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Log workflow context
+        # Keep a brief log here indicating the knip job started (context already logged by `log-context`).
+        run: |
+          echo "[CI][knip] Starting Knip run"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          # Cache npm for knip job too.
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - run: npm ci
+      - name: Run Knip (non-blocking)
+        run: npm run knip || true # Always succeed
+      - name: Upload Knip report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knip-report
+          path: .
+          retention-days: 7
