@@ -42,8 +42,7 @@ const routeTree = rootRoute.addChildren([indexRoute]);
 export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
-  basepath:
-    import.meta.env.MODE === 'production' ? '/modern-react-template/app' : '/',
+  basepath: import.meta.env.MODE === 'production' ? '/agentic-ui/app' : '/',
 });
 
 /**

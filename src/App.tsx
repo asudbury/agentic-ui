@@ -4,8 +4,9 @@
  * This component sets up the application's global providers and renders the router.
  *
  * Provider Hierarchy:
- * 1. QueryClientProvider - Manages server state with TanStack Query
- * 2. RouterProvider - Manages routing with TanStack Router
+ * 1. ThemeProvider - Manages light/dark theme state
+ * 2. QueryClientProvider - Manages server state with TanStack Query
+ * 3. RouterProvider - Manages routing with TanStack Router
  *
  * Configuration:
  * - Query stale time: 5 minutes
@@ -17,6 +18,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { router } from './router';
 /**
  * TanStack Query client configuration
@@ -40,8 +42,10 @@ const queryClient = new QueryClient({
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
