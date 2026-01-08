@@ -8,6 +8,7 @@
  * - Color-coded by action type
  * - Timestamps for each action
  * - Icons for visual distinction
+ * - Collapsible with default collapsed state
  *
  * @example
  * ```tsx
@@ -15,7 +16,15 @@
  * ```
  */
 
-import { CheckCircle, AlertCircle, Info, Clock } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import {
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Clock,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 
 export type ActivityType = 'action' | 'decision' | 'info' | 'error';
 
@@ -31,6 +40,12 @@ export interface ActivityLogProps {
 }
 
 export function ActivityLog({ activities }: ActivityLogProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((prev) => !prev);
+  }, []);
+
   const getActivityIcon = (type: ActivityType) => {
     switch (type) {
       case 'action':
@@ -53,55 +68,64 @@ export function ActivityLog({ activities }: ActivityLogProps) {
   };
 
   if (activities.length === 0) {
-    return (
-      <div
-        className="p-4 rounded-lg text-center"
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          border: '1px solid var(--color-border)',
-        }}
-      >
-        <p className="text-sm text-text-muted m-0">
-          No activities yet. Start by submitting a goal.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (
     <div
-      className="p-4 rounded-lg"
+      className="rounded-lg"
       style={{
         backgroundColor: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
       }}
     >
-      <h3 className="text-sm font-bold text-text-primary mb-3 mt-0">
-        Activity Log
-      </h3>
+      <button
+        onClick={toggleExpanded}
+        className="w-full flex items-center justify-between p-4 text-left transition"
+        style={{
+          cursor: 'pointer',
+          background: 'none',
+          border: 'none',
+        }}
+        aria-expanded={isExpanded}
+        aria-controls="activity-log-content"
+      >
+        <h3 className="text-sm font-bold text-text-primary m-0">
+          Activity Log ({activities.length})
+        </h3>
+        {isExpanded ? (
+          <ChevronDown size={20} color="var(--color-text-secondary)" />
+        ) : (
+          <ChevronRight size={20} color="var(--color-text-secondary)" />
+        )}
+      </button>
 
-      <div className="flex flex-col gap-2">
-        {activities.map((activity, index) => (
-          <div
-            key={activity.id}
-            className="flex items-start gap-3 p-3 rounded animate-slide-in"
-            style={{
-              backgroundColor: 'var(--color-background)',
-              animationDelay: `${index * 0.05}s`,
-            }}
-          >
-            <div className="mt-1">{getActivityIcon(activity.type)}</div>
-            <div className="flex-1">
-              <p className="text-sm text-text-primary m-0 mb-1">
-                {activity.message}
-              </p>
-              <p className="text-xs text-text-muted m-0">
-                {formatTime(activity.timestamp)}
-              </p>
-            </div>
+      {isExpanded && (
+        <div id="activity-log-content" className="px-4 pb-4">
+          <div className="flex flex-col gap-2">
+            {activities.map((activity, index) => (
+              <div
+                key={activity.id}
+                className="flex items-start gap-3 p-3 rounded animate-slide-in"
+                style={{
+                  backgroundColor: 'var(--color-background)',
+                  animationDelay: `${index * 0.05}s`,
+                }}
+              >
+                <div className="mt-1">{getActivityIcon(activity.type)}</div>
+                <div className="flex-1">
+                  <p className="text-sm text-text-primary m-0 mb-1">
+                    {activity.message}
+                  </p>
+                  <p className="text-xs text-text-muted m-0">
+                    {formatTime(activity.timestamp)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

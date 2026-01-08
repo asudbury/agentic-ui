@@ -50,12 +50,6 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
   return (
     <div className="flex flex-col gap-4">
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <label
-          htmlFor="goal-input"
-          className="text-sm font-medium text-text-primary"
-        >
-          What would you like to achieve?
-        </label>
         <textarea
           id="goal-input"
           value={goal}
@@ -96,7 +90,7 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
           }}
         >
           <Send size={18} />
-          <span>{isProcessing ? 'Processing...' : 'Start Agent'}</span>
+          <span>{isProcessing ? 'Processing...' : 'Send'}</span>
         </button>
       </form>
 
@@ -107,11 +101,12 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
             <button
               key={index}
               onClick={() => handleExampleClick(example)}
-              className="text-left p-3 rounded-lg text-sm transition"
+              className="text-left p-3 rounded-lg text-sm transition cursor-pointer"
               style={{
                 backgroundColor: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
                 color: 'var(--color-text-secondary)',
+                cursor: 'pointer',
               }}
               disabled={isProcessing}
             >

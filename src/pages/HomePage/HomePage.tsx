@@ -17,6 +17,7 @@
 import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Header } from '../../components/Header';
+import { Footer } from '../../components/Footer';
 import { GoalInput } from '../../components/GoalInput';
 import {
   AgentStatus,
@@ -162,12 +163,12 @@ export function HomePage() {
 
   return (
     <div
-      className="min-h-screen"
+      className="min-h-screen flex flex-col"
       style={{ backgroundColor: 'var(--color-background)' }}
     >
       <Header />
 
-      <main className="container py-6" id="main-content">
+      <main className="container py-6 flex-1" id="main-content">
         {/* Status Bar */}
         <div
           className="mb-6 p-4 rounded-lg"
@@ -217,7 +218,7 @@ export function HomePage() {
               </>
             )}
 
-            {activities.length > 0 && <ActivityLog activities={activities} />}
+            <ActivityLog activities={activities} />
           </div>
         </div>
 
@@ -261,6 +262,8 @@ export function HomePage() {
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }
