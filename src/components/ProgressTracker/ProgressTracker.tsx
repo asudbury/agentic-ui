@@ -15,7 +15,8 @@
  * ```
  */
 
-import { CheckCircle, Circle } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { CheckCircle, Circle, ChevronDown, ChevronRight } from 'lucide-react';
 
 export interface ProgressStep {
   id: string;
@@ -32,8 +33,13 @@ export function ProgressTracker({
   steps,
   currentStepIndex,
 }: ProgressTrackerProps) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const completedCount = steps.filter((s) => s.completed).length;
   const progressPercentage = (completedCount / steps.length) * 100;
+
+  const toggleCollapsed = useCallback(() => {
+    setIsCollapsed((prev) => !prev);
+  }, []);
 
   if (steps.length === 0) {
     return null;
@@ -43,85 +49,115 @@ export function ProgressTracker({
     <div
       className="p-4 rounded-lg"
       style={{
-        backgroundColor: 'var(--color-surface)',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(10px)',
         border: '1px solid var(--color-border)',
+        boxShadow: 'var(--shadow-md)',
       }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-bold text-text-primary m-0">Progress</h3>
-        <span className="text-xs text-text-muted">
-          {completedCount} of {steps.length} completed
-        </span>
-      </div>
-
-      {/* Progress bar */}
-      <div
-        className="rounded-full mb-4"
+      <button
+        onClick={toggleCollapsed}
+        className="flex items-center justify-between w-full mb-3 cursor-pointer"
         style={{
-          width: '100%',
-          height: '8px',
-          backgroundColor: 'var(--color-border)',
-          overflow: 'hidden',
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
         }}
+        aria-expanded={!isCollapsed}
       >
         <div
-          className="rounded-full transition"
-          style={{
-            width: `${progressPercentage}%`,
-            height: '100%',
-            backgroundColor: 'var(--color-success)',
-            transition: 'width 0.3s ease',
-          }}
-        />
-      </div>
+          className="flex items-center justify-between"
+          style={{ width: '100%' }}
+        >
+          <h3 className="text-sm font-bold text-text-primary m-0">Progress</h3>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-muted">
+              {completedCount} of {steps.length}
+            </span>
+            {isCollapsed ? (
+              <ChevronRight size={18} color="var(--color-text-muted)" />
+            ) : (
+              <ChevronDown size={18} color="var(--color-text-muted)" />
+            )}
+          </div>
+        </div>
+      </button>
 
-      {/* Steps list */}
-      <div className="flex flex-col gap-2">
-        {steps.map((step, index) => {
-          const isCurrent = index === currentStepIndex;
-          const isCompleted = step.completed;
-
-          return (
+      {!isCollapsed && (
+        <>
+          {/* Progress bar */}
+          <div
+            className="rounded-full mb-4"
+            style={{
+              width: '100%',
+              height: '8px',
+              backgroundColor: 'var(--color-border)',
+              overflow: 'hidden',
+            }}
+          >
             <div
-              key={step.id}
-              className="flex items-center gap-2 p-2 rounded"
+              className="rounded-full transition"
               style={{
-                backgroundColor: isCurrent
-                  ? 'var(--color-background)'
-                  : 'transparent',
-                border: isCurrent
-                  ? '1px solid var(--color-primary)'
-                  : '1px solid transparent',
+                width: `${progressPercentage}%`,
+                height: '100%',
+                backgroundColor: 'var(--color-success)',
+                transition: 'width 0.3s ease',
               }}
-            >
-              {isCompleted ? (
-                <CheckCircle size={18} color="var(--color-success)" />
-              ) : (
-                <Circle
-                  size={18}
-                  color={
-                    isCurrent ? 'var(--color-primary)' : 'var(--color-border)'
-                  }
-                  fill={isCurrent ? 'var(--color-primary)' : 'transparent'}
-                />
-              )}
-              <span
-                className="text-sm"
-                style={{
-                  color: isCompleted
-                    ? 'var(--color-text-secondary)'
-                    : isCurrent
-                      ? 'var(--color-text)'
-                      : 'var(--color-text-muted)',
-                  fontWeight: isCurrent ? 600 : 400,
-                }}
-              >
-                {step.label}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+            />
+          </div>
+
+          {/* Steps list */}
+          <div className="flex flex-col gap-2">
+            {steps.map((step, index) => {
+              const isCurrent = index === currentStepIndex;
+              const isCompleted = step.completed;
+
+              return (
+                <div
+                  key={step.id}
+                  className="flex items-center gap-2 p-2 rounded"
+                  style={{
+                    backgroundColor: isCurrent
+                      ? 'var(--color-background)'
+                      : 'transparent',
+                    border: isCurrent
+                      ? '1px solid var(--color-primary)'
+                      : '1px solid transparent',
+                  }}
+                >
+                  {isCompleted ? (
+                    <CheckCircle size={18} color="var(--color-success)" />
+                  ) : (
+                    <Circle
+                      size={18}
+                      color={
+                        isCurrent
+                          ? 'var(--color-primary)'
+                          : 'var(--color-border)'
+                      }
+                      fill={isCurrent ? 'var(--color-primary)' : 'transparent'}
+                    />
+                  )}
+                  <span
+                    className="text-sm"
+                    style={{
+                      color: isCompleted
+                        ? 'var(--color-text-secondary)'
+                        : isCurrent
+                          ? 'var(--color-text)'
+                          : 'var(--color-text-muted)',
+                      fontWeight: isCurrent ? 600 : 400,
+                    }}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }

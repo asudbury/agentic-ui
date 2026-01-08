@@ -57,9 +57,13 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
 
   const handleExampleClick = useCallback(
     (example: string) => () => {
-      setGoal(example);
+      if (!isProcessing) {
+        setGoal(example);
+        // Auto-submit when selecting example goal
+        onSubmit(example);
+      }
     },
-    []
+    [isProcessing, onSubmit]
   );
 
   const examples = [

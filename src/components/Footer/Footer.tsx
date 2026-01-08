@@ -22,12 +22,10 @@ export function Footer() {
       className="border-color mt-6"
       style={{ borderTop: '1px solid var(--color-border)' }}
     >
-      <div className="container p-4">
+      <div className="container" style={{ padding: '0.75rem 2rem' }}>
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <p className="text-xs text-text-muted m-0">
-            © 2026 Agentic UI. Built with React and TypeScript.
-          </p>
-          <p className="text-xs text-text-muted m-0">Version {version}</p>
+          <p className="text-xs text-text-muted m-0">© 2026 Agentic UI</p>
+          <p className="text-xs text-text-muted m-0">v{version}</p>
         </div>
       </div>
     </footer>

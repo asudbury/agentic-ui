@@ -15,7 +15,7 @@
  */
 
 import { useCallback } from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Sparkles } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { AgentStatus, type AgentStatusType } from '../AgentStatus';
 
@@ -49,13 +49,7 @@ export function Header({ status, statusMessage }: HeaderProps) {
               justifyContent: 'center',
             }}
           >
-            <span
-              className="text-2xl"
-              role="img"
-              aria-label="AI assistant logo"
-            >
-              🤖
-            </span>
+            <Sparkles size={24} color="white" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-text-primary m-0">
@@ -65,30 +59,33 @@ export function Header({ status, statusMessage }: HeaderProps) {
               Autonomous AI Assistant
             </p>
           </div>
+        </div>
+
+        <div className="flex items-center gap-4">
           {status && (
             <div className="flex items-center gap-2">
               <AgentStatus status={status} message={statusMessage || ''} />
             </div>
           )}
-        </div>
 
-        <button
-          onClick={handleToggleTheme}
-          className="flex items-center justify-center p-2 rounded-lg transition cursor-pointer"
-          style={{
-            backgroundColor: 'var(--color-surface-secondary)',
-            border: '1px solid var(--color-border)',
-            cursor: 'pointer',
-          }}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? (
-            <Moon size={20} color="var(--color-text)" />
-          ) : (
-            <Sun size={20} color="var(--color-text)" />
-          )}
-        </button>
+          <button
+            onClick={handleToggleTheme}
+            className="flex items-center justify-center p-2 rounded-lg transition cursor-pointer"
+            style={{
+              backgroundColor: 'var(--color-surface-secondary)',
+              border: '1px solid var(--color-border)',
+              cursor: 'pointer',
+            }}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? (
+              <Moon size={20} color="var(--color-text)" />
+            ) : (
+              <Sun size={20} color="var(--color-text)" />
+            )}
+          </button>
+        </div>
       </div>
     </header>
   );

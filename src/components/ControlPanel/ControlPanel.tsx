@@ -20,8 +20,14 @@
  * ```
  */
 
-import { useCallback } from 'react';
-import { Pause, Play, StopCircle } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import {
+  Pause,
+  Play,
+  StopCircle,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 
 export interface ControlPanelProps {
   isActive: boolean;
@@ -38,6 +44,8 @@ export function ControlPanel({
   onResume,
   onStop,
 }: ControlPanelProps) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+
   const handlePause = useCallback(() => {
     onPause();
   }, [onPause]);
@@ -50,6 +58,10 @@ export function ControlPanel({
     onStop();
   }, [onStop]);
 
+  const toggleCollapsed = useCallback(() => {
+    setIsCollapsed((prev) => !prev);
+  }, []);
+
   if (!isActive) {
     return null;
   }
@@ -58,66 +70,89 @@ export function ControlPanel({
     <div
       className="p-4 rounded-lg"
       style={{
-        backgroundColor: 'var(--color-surface)',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        backdropFilter: 'blur(10px)',
         border: '1px solid var(--color-border)',
+        boxShadow: 'var(--shadow-md)',
       }}
     >
-      <h3 className="text-sm font-bold text-text-primary mb-3 mt-0">
-        Agent Controls
-      </h3>
-
-      <div className="flex gap-2">
-        {!isPaused ? (
-          <button
-            onClick={handlePause}
-            className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition"
-            style={{
-              backgroundColor: 'var(--color-warning)',
-              color: 'white',
-            }}
-            aria-label="Pause agent"
-          >
-            <Pause size={18} />
-            <span>Pause</span>
-          </button>
-        ) : (
-          <button
-            onClick={handleResume}
-            className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition"
-            style={{
-              backgroundColor: 'var(--color-success)',
-              color: 'white',
-            }}
-            aria-label="Resume agent"
-          >
-            <Play size={18} />
-            <span>Resume</span>
-          </button>
-        )}
-
-        <button
-          onClick={handleStop}
-          className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition"
-          style={{
-            backgroundColor: 'var(--color-error)',
-            color: 'white',
-          }}
-          aria-label="Stop agent"
-        >
-          <StopCircle size={18} />
-          <span>Stop</span>
-        </button>
-      </div>
-
-      <div
-        className="mt-3 p-3 rounded"
-        style={{ backgroundColor: 'var(--color-background)' }}
+      <button
+        onClick={toggleCollapsed}
+        className="flex items-center justify-between w-full mb-3 cursor-pointer"
+        style={{
+          background: 'none',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
+        }}
+        aria-expanded={!isCollapsed}
       >
-        <p className="text-xs text-text-muted m-0">
-          💡 You can interrupt the agent at any time to provide feedback or
-          change direction.
-        </p>
-      </div>
+        <h3 className="text-sm font-bold text-text-primary m-0">
+          Agent Controls
+        </h3>
+        {isCollapsed ? (
+          <ChevronRight size={18} color="var(--color-text-muted)" />
+        ) : (
+          <ChevronDown size={18} color="var(--color-text-muted)" />
+        )}
+      </button>
+
+      {!isCollapsed && (
+        <>
+          <div className="flex gap-2">
+            {!isPaused ? (
+              <button
+                onClick={handlePause}
+                className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition"
+                style={{
+                  backgroundColor: 'var(--color-warning)',
+                  color: 'white',
+                }}
+                aria-label="Pause agent"
+              >
+                <Pause size={18} />
+                <span>Pause</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleResume}
+                className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition"
+                style={{
+                  backgroundColor: 'var(--color-success)',
+                  color: 'white',
+                }}
+                aria-label="Resume agent"
+              >
+                <Play size={18} />
+                <span>Resume</span>
+              </button>
+            )}
+
+            <button
+              onClick={handleStop}
+              className="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition"
+              style={{
+                backgroundColor: 'var(--color-error)',
+                color: 'white',
+              }}
+              aria-label="Stop agent"
+            >
+              <StopCircle size={18} />
+              <span>Stop</span>
+            </button>
+          </div>
+
+          <div
+            className="mt-3 p-3 rounded"
+            style={{ backgroundColor: 'var(--color-background)' }}
+          >
+            <p className="text-xs text-text-muted m-0">
+              💡 You can interrupt the agent at any time to provide feedback or
+              change direction.
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

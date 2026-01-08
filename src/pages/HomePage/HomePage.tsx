@@ -173,17 +173,17 @@ export function HomePage() {
           style={{ gridTemplateColumns: '1fr 1.5fr' }}
         >
           {/* Left Column - Agent Information (Narrower) */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6" style={{ paddingTop: '1.5rem' }}>
+            <ControlPanel
+              isActive={isActive}
+              isPaused={isPaused}
+              onPause={handlePause}
+              onResume={handleResume}
+              onStop={handleStop}
+            />
+
             {isActive && (
               <>
-                <ControlPanel
-                  isActive={isActive}
-                  isPaused={isPaused}
-                  onPause={handlePause}
-                  onResume={handleResume}
-                  onStop={handleStop}
-                />
-
                 <ProgressTracker
                   steps={steps}
                   currentStepIndex={currentStepIndex}

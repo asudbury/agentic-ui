@@ -148,6 +148,11 @@
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
     /* Add more dark theme overrides as needed */
   }
+
+  /* Glassmorphism effect for dark theme */
+  .theme-dark [style*='backdrop-filter'] {
+    background-color: rgba(30, 41, 59, 0.7) !important;
+  }
 }
 
 /* ===================== Example Usage ===================== */
