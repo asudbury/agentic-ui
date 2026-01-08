@@ -135,7 +135,7 @@ export function GoalInput({ onSubmit, isProcessing = false }: GoalInputProps) {
               style={{
                 backgroundColor: 'var(--color-surface)',
                 border: '1px solid var(--color-border)',
-                color: 'var(--color-text-secondary)',
+              key={example}
                 cursor: 'pointer',
               }}
               disabled={isProcessing}
