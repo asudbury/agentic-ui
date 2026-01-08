@@ -36,7 +36,16 @@ export function Header({ status, statusMessage }: HeaderProps) {
       className="bg-surface border-color"
       style={{ borderBottom: '1px solid var(--color-border)' }}
     >
-      <div className="container flex items-center justify-between p-4">
+      <div
+        className="container p-4"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          alignItems: 'center',
+          gap: '1rem',
+        }}
+      >
+        {/* Left: Logo and branding */}
         <div className="flex items-center gap-4">
           <div
             className="bg-primary"
@@ -61,13 +70,18 @@ export function Header({ status, statusMessage }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Center: Agent Status */}
+        <div
+          className="flex items-center justify-center"
+          style={{ justifySelf: 'center' }}
+        >
           {status && (
-            <div className="flex items-center gap-2">
-              <AgentStatus status={status} message={statusMessage || ''} />
-            </div>
+            <AgentStatus status={status} message={statusMessage || ''} />
           )}
+        </div>
 
+        {/* Right: Theme toggle */}
+        <div className="flex items-center justify-end">
           <button
             onClick={handleToggleTheme}
             className="flex items-center justify-center p-2 rounded-lg transition cursor-pointer"
