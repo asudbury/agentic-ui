@@ -25,6 +25,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export type ActivityType = 'action' | 'decision' | 'info' | 'error';
 
@@ -41,6 +42,7 @@ export interface ActivityLogProps {
 
 export function ActivityLog({ activities }: ActivityLogProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { theme } = useTheme();
 
   const toggleExpanded = useCallback(() => {
     setIsExpanded((prev) => !prev);
@@ -75,8 +77,20 @@ export function ActivityLog({ activities }: ActivityLogProps) {
     <div
       className="rounded-lg"
       style={{
-        backgroundColor: 'var(--color-surface)',
-        border: '1px solid var(--color-border)',
+        backgroundColor:
+          theme === 'dark'
+            ? 'rgba(30, 41, 59, 0.85)'
+            : 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        border:
+          theme === 'dark'
+            ? '1px solid rgba(255, 255, 255, 0.1)'
+            : '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow:
+          theme === 'dark'
+            ? '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+            : '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
       }}
     >
       <button

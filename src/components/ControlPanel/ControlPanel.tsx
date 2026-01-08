@@ -28,6 +28,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export interface ControlPanelProps {
   isActive: boolean;
@@ -44,7 +45,8 @@ export function ControlPanel({
   onResume,
   onStop,
 }: ControlPanelProps) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { theme } = useTheme();
 
   const handlePause = useCallback(() => {
     onPause();
@@ -70,10 +72,20 @@ export function ControlPanel({
     <div
       className="p-4 rounded-lg"
       style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid var(--color-border)',
-        boxShadow: 'var(--shadow-md)',
+        backgroundColor:
+          theme === 'dark'
+            ? 'rgba(30, 41, 59, 0.85)'
+            : 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        border:
+          theme === 'dark'
+            ? '1px solid rgba(255, 255, 255, 0.1)'
+            : '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow:
+          theme === 'dark'
+            ? '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+            : '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
       }}
     >
       <button
