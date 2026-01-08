@@ -19,10 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { GoalInput } from '../../components/GoalInput';
-import {
-  AgentStatus,
-  type AgentStatusType,
-} from '../../components/AgentStatus';
+import type { AgentStatusType } from '../../components/AgentStatus';
 import {
   ReasoningPanel,
   type ReasoningStep,
@@ -167,20 +164,15 @@ export function HomePage() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: 'var(--color-background)' }}
     >
-      <Header />
+      <Header status={status} statusMessage={statusMessage} />
 
       <main className="container py-6 flex-1" id="main-content">
-        {/* Status Bar */}
+        {/* Two Column Layout - Fixed Side by Side (Left smaller than right) */}
         <div
-          className="mb-6 p-4 rounded-lg"
-          style={{ backgroundColor: 'var(--color-surface)' }}
+          className="grid gap-6"
+          style={{ gridTemplateColumns: '1fr 1.5fr' }}
         >
-          <AgentStatus status={status} message={statusMessage} />
-        </div>
-
-        {/* Two Column Layout - Fixed Side by Side */}
-        <div className="grid gap-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          {/* Left Column - Agent Information */}
+          {/* Left Column - Agent Information (Narrower) */}
           <div className="flex flex-col gap-6">
             {isActive && (
               <>

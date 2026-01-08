@@ -17,8 +17,14 @@
 import { useCallback } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
+import { AgentStatus, type AgentStatusType } from '../AgentStatus';
 
-export function Header() {
+export interface HeaderProps {
+  status?: AgentStatusType;
+  statusMessage?: string;
+}
+
+export function Header({ status, statusMessage }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
 
   const handleToggleTheme = useCallback(() => {
@@ -31,7 +37,7 @@ export function Header() {
       style={{ borderBottom: '1px solid var(--color-border)' }}
     >
       <div className="container flex items-center justify-between p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <div
             className="bg-primary"
             style={{
@@ -59,6 +65,11 @@ export function Header() {
               Autonomous AI Assistant
             </p>
           </div>
+          {status && (
+            <div className="flex items-center gap-2">
+              <AgentStatus status={status} message={statusMessage || ''} />
+            </div>
+          )}
         </div>
 
         <button
