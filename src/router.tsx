@@ -12,19 +12,16 @@
 import {
   createRouter,
   createRootRoute,
-  createRoute,
+  createRoute
 } from '@tanstack/react-router';
 
 import { RootComponent } from './components/RootComponent';
 import { HomePage } from './pages/HomePage';
-import { NotFoundPageAdapter } from './pages/NotFoundPage/NotFoundPageAdapter';
-
 /**
  * Root route definition for TanStack Router
  */
 const rootRoute = createRootRoute({
-  component: RootComponent,
-  notFoundComponent: NotFoundPageAdapter,
+  component: RootComponent
 });
 
 /**
@@ -33,20 +30,10 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: HomePage,
+  component: HomePage
 });
 
-/**
- * Route tree configuration
- * Defines the hierarchy and structure of all routes
- */
-const notFoundRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '*',
-  component: NotFoundPageAdapter,
-});
-
-const routeTree = rootRoute.addChildren([indexRoute, notFoundRoute]);
+const routeTree = rootRoute.addChildren([indexRoute]);
 
 /**
  * Router instance
@@ -56,8 +43,7 @@ export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   basepath:
-    import.meta.env.MODE === 'production' ? '/modern-react-template/app' : '/',
-  defaultNotFoundComponent: NotFoundPageAdapter,
+    import.meta.env.MODE === 'production' ? '/modern-react-template/app' : '/'
 });
 
 /**
